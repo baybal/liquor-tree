@@ -19,6 +19,7 @@
         tabindex="-1"
         ref="anchor"
         @focus="onNodeFocus"
+        @click.right.prevent="tree.$emit('node:rightclick', node, $event)"
         @dblclick="tree.$emit('node:dblclick', node)">
           <node-content :node="node" />
       </span>
