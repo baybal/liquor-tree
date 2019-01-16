@@ -1,9 +1,9 @@
 <template>
   <li class="tree-node" :data-id="node.id" :class="nodeClass" @mousedown.stop="handleMouseDown">
-    <div class="tree-content" :style="{'padding-left': paddingLeft}" @mouseup.stop="select">
+    <div class="tree-content" :style="[options.direction == 'ltr' ? {'padding-left': padding} : {'padding-right': padding}]" @mouseup.stop="select">
       <i
         class="tree-arrow"
-        :class="{'expanded': node.states.expanded, 'has-child': node.children.length || node.isBatch}"
+        :class="[{'expanded': node.states.expanded, 'has-child': node.children.length || node.isBatch}, options.direction]"
         @mouseup.stop="toggleExpand">
       </i>
 
@@ -64,8 +64,8 @@
     },
 
     computed: {
-      paddingLeft() {
-        return this.node.depth * this.options.paddingLeft + 'px'
+      padding() {
+        return this.node.depth * (this.options.paddingLeft ? this.options.paddingLeft : this.options.nodeIndent) + 'px'
       },
 
       nodeClass() {
@@ -250,6 +250,20 @@
     transform-origin: center;
   }
 
+  .tree-arrow.has-child.rtl:after {
+    border: 1.5px solid #494646;
+    position: absolute;
+    border-right: 0;
+    border-bottom: 0;
+    right: 0px;
+    top: 50%;
+    height: 9px;
+    width: 9px;
+    transform: rotate(-45deg) translateY(-50%) translateX(0);
+    transition: transform .25s;
+    transform-origin: center;
+  }
+
   .tree-arrow.expanded.has-child:after {
     transform: rotate(45deg) translateY(-50%) translateX(-5px);
   }
@@ -321,11 +335,11 @@
     user-select: none;
   }
 
-  .tree-node.selected .tree-anchor {
+  .tree-node.selected > .tree-content > .tree-anchor {
     outline: none;
   }
 
-  .tree-node.disabled .tree-anchor {
+  .tree-node.disabled > .tree-content > .tree-anchor {
     color: #989191;
     background: #fff;
     opacity: .6;
