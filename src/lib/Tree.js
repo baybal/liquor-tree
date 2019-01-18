@@ -181,10 +181,12 @@ export default class Tree {
         node.append(children)
         node.isBatch = false
 
-        if (node.checked()) {
-          node.recurseDown(child => {
-            child.state('checked', true)
-          })
+        if (this.options.autoCheckChildren) {
+          if (node.checked()) {
+            node.recurseDown(child => {
+              child.state('checked', true)
+            })
+          }
         }
 
         this.$emit('tree:data:received', node)
@@ -199,7 +201,7 @@ export default class Tree {
     })
   }
 
-  fetch (node) {
+  fetch (node, parseData) {
     let result = this.options.fetchData(node)
 
     if (!result.then) {
@@ -207,11 +209,15 @@ export default class Tree {
         .catch(this.options.onFetchError)
     }
 
-    result
-      .then(data => data && this.parse(data, this.options.modelParse))
-      .catch(this.options.onFetchError)
+    if (false === parseData) {
+      return result
+    }
 
     return result
+      .then(data => {
+        return this.parse(data, this.options.modelParse)
+      })
+      .catch(this.options.onFetchError)
   }
 
   fetchInitData () {
@@ -221,7 +227,7 @@ export default class Tree {
       name: 'root'
     }
 
-    return this.fetch(node)
+    return this.fetch(node, false)
   }
 
   setModel (data) {
@@ -250,7 +256,7 @@ export default class Tree {
         }
       }
 
-      if (node.disabled()) {
+      if (this.options.autoDisableChildren && node.disabled()) {
         node.recurseDown(child => {
           child.state('disabled', true)
         })
